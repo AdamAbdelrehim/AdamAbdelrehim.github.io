@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Paster</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+        .output {
+            font-size: 18px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Type Something</h1>
+        <input type="text" id="userInput" placeholder="Start typing...">
+        <div class="output" id="outputText"></div>
+    </div>
+
+    <script>
+        const userInput = document.getElementById('userInput');
+        const outputText = document.getElementById('outputText');
+
+        userInput.addEventListener('input', function() {
+            outputText.textContent = userInput.value;
+        });
+    </script>
+</body>
+</html>
