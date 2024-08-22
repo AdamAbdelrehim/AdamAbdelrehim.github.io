@@ -106,7 +106,8 @@
         draggable: true,
         position: 'start',
         onDragStart: onDragStart,
-        onDrop: onDrop
+        onDrop: onDrop,
+        onSnapEnd: function() {}
       };
 
       board1 = ChessBoard('board1', cfg);
