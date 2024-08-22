@@ -1,8 +1,24 @@
-let model = undefined;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load TensorFlow Model</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+</head>
+<body>
+    <h1>TensorFlow.js Model Loader</h1>
+    <p>Loading the TensorFlow.js model...</p>
 
-async function loadModel() {
-    model = await tf.loadLayersModel(Models/AdamBot/model.json);
-    model.summary();
-}
+    <script>
+        let model = undefined;
 
-loadModel();
+        async function loadModel() {
+            model = await tf.loadLayersModel('Models/AdamBot/model.json');
+            model.summary();
+        }
+
+        loadModel();
+    </script>
+</body>
+</html>
