@@ -14,11 +14,15 @@
         let model = undefined;
 
         async function loadModel() {
-            model = await tf.loadLayersModel('Models/AdamBot/model.json');
-            model.summary();
-        }
+    try {
+        model = await tf.loadLayersModel('Models/AdamBot/model.json');
+        model.summary();
+    } catch (error) {
+        console.error('Error loading model:', error);
+    }
+}
 
-        loadModel();
+loadModel();
     </script>
 </body>
 </html>
