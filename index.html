@@ -46,7 +46,7 @@
       var game = new Chess();
 
       async function loadModel() {
-        modelBlack = await tf.loadLayersModel('Models/AdamBot/AdamBot.json');
+        modelBlack = await tf.loadLayersModel('Models/AdamBot/model.json');
         model.summary();
       }
 
