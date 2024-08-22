@@ -44,7 +44,7 @@
   <script>
     var board1 = null;
     var game = new Chess();
-    var engine = new Worker('./node_modules/stockfish/src/stockfish-nnue-16.js');
+    var engine = new Worker('https://cdn.jsdelivr.net/npm/stockfish@latest/stockfish.js');
     
     function onDragStart (source, piece, position, orientation) {
       if (game.game_over()) return false;
