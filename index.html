@@ -87,6 +87,8 @@
         var moveColor = 'White';
         if (game.turn() === 'b') {
           moveColor = 'Black';
+          game.move('e5');
+          updateStatus();
         }
 
         // checkmate?
@@ -113,41 +115,6 @@
         $('#fen').html(game.fen());
         $('#pgn').html(game.pgn());
       }
-
-    function preprocessFEN(fen) {
-      // Convert FEN string to board matrix
-      const boardMatrix = convertFENToMatrix(fen);
-      // Convert to tensor
-      return tf.tensor(boardMatrix, [1, 8, 8, 12]);
-    }
-
-    function convertFENToMatrix(fen) {
-      // Convert FEN string to 8x8x12 matrix
-      const matrix = Array.from(Array(8), () => Array.from(Array(8), () => Array(12).fill(0)));
-      // Implement FEN to matrix conversion logic here
-      return matrix;
-    }
-
-    async function makeBotMove() {
-      if (!model) return;
-
-      const boardMatrix = preprocessFEN(game.fen());
-      const predictions = model.predict(boardMatrix).arraySync()[0];
-      const legalMoves = Array.from(game.legal_moves()).map(move => move.uci());
-      const sortedIndices = predictions.map((p, i) => i).sort((a, b) => predictions[b] - predictions[a]);
-
-      for (const moveIndex of sortedIndices) {
-        const move = intToMove[moveIndex];
-        if (legalMoves.includes(move)) {
-          game.move(move);
-          board1.position(game.fen());
-          updateStatus();
-          break;
-        }
-      }
-    }
-
-    const intToMove = {}; // Populate this dictionary based on your model's move encoding
 
       var config = {
         draggable: true,
