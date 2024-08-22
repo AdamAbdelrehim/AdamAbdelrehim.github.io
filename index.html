@@ -7,11 +7,27 @@
         integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
         crossorigin="anonymous"></script>
     <script src="chessboardjs-1.0.0/js/chessboard-1.0.0.min.js"></script>
+    <style>
+      #board1 {
+        width: 400px;
+        margin: 0 auto;
+      }
+    </style>
   </head>
   <body>
-    <div id="board1" style="width: 400px"></div>
+    <div id="board1"></div>
     <script>
-        var board1 = ChessBoard('board1', 'start');
+      var cfg = {
+        draggable: true,  // Enable dragging of pieces
+        position: 'start', // Initial position of the pieces
+        onChange: onChange  // Callback for when a move is made
+      };
+      
+      var board1 = ChessBoard('board1', cfg);
+      
+      function onChange(position) {
+        console.log('Position changed:', position);
+      }
     </script>
   </body>
 </html>
