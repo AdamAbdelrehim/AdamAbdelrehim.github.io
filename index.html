@@ -3,44 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Paster</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            text-align: center;
-        }
-        input {
-            padding: 10px;
-            font-size: 16px;
-            width: 300px;
-            margin-bottom: 20px;
-        }
-        .output {
-            font-size: 18px;
-            color: #333;
-        }
-    </style>
+    <title>Chess Board</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Type Something</h1>
-        <input type="text" id="userInput" placeholder="Start typing...">
-        <div class="output" id="outputText"></div>
-    </div>
-
+    <iframe id="12106419" allowtransparency="true" frameborder="0" style="width:100%;border:none;" src="//www.chess.com/emboard?id=12106419"></iframe>
     <script>
-        const userInput = document.getElementById('userInput');
-        const outputText = document.getElementById('outputText');
-
-        userInput.addEventListener('input', function() {
-            outputText.textContent = userInput.value;
+        window.addEventListener("message", e => {
+            if (e.data && e.data.id === "12106419") {
+                const iframe = document.getElementById(`${e.data.id}`);
+                if (iframe) {
+                    iframe.style.height = `${e.data.frameHeight + 30}px`;
+                }
+            }
         });
     </script>
 </body>
