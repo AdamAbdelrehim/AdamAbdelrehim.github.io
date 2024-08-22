@@ -1,123 +1,190 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Chess</title>
-    <link rel="stylesheet" href="chessboardjs-1.0.0/css/chessboard-1.0.0.min.css">
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
-        integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
-        crossorigin="anonymous"></script>
-    <script src="chessboardjs-1.0.0/js/chessboard-1.0.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js" integrity="sha384-s3XgLpvmHyscVpijnseAmye819Ee3yaGa8NxstkJVyA6nuDFjt59u1QvuEl/mecz" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <style>
-      body {
-        background-color: black;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
-      #board1 {
-        width: 800px;
-        height: 800px;
-      }
-      #info {
-        position: absolute;
-        align-items: center;
-        bottom: 100px;
-      }
-      #status, #fen, #pgn {
-        color: white;
-        font-family: Arial, sans-serif;
-        font-size: large;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="board1"></div>
-    <div id="info">
-        <div id="pgn"></div>
-    </div>
+<head>
+  <title>Chess</title>
+  <link rel="stylesheet" href="chessboardjs-1.0.0/css/chessboard-1.0.0.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+          integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
+          crossorigin="anonymous"></script>
+  <script src="chessboardjs-1.0.0/js/chessboard-1.0.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js" integrity="sha384-s3XgLpvmHyscVpijnseAmye819Ee3yaGa8NxstkJVyA6nuDFjt59u1QvuEl/mecz" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <style>
+    body {
+      background-color: black;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #board1 {
+      width: 800px;
+      height: 800px;
+    }
+    #info {
+      position: absolute;
+      align-items: center;
+      bottom: 100px;
+    }
+    #status, #fen, #pgn {
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: large;
+    }
+  </style>
+</head>
+<body>
+  <div id="board1"></div>
+  <div id="info">
+      <div id="status"></div>
+      <div id="fen"></div>
+      <div id="pgn"></div>
+  </div>
 
-    <script>
-      var board1 = null;
-      var game = new Chess();
+  <script>
+    var board1 = null;
+    var game = new Chess();
+    var modelBlack = null;
 
-      function onDragStart (source, piece, position, orientation) {
-        // do not pick up pieces if the game is over
-        if (game.game_over()) return false;
+    async function loadModel() {
+      modelBlack = await tf.loadLayersModel('Models/AdamBot.json');
+    }
 
-        // only pick up pieces for the side to move
-        if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-            (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
-          return false;
+function preprocessFEN(fen) {
+  // FEN example: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+  
+  // Split the FEN string into components
+  const [position] = fen.split(' ');
+
+  // Convert the board position part
+  const rows = position.split('/');
+  const board = [];
+  for (let i = 0; i < 8; i++) {
+    const row = rows[i];
+    const rowArray = [];
+    for (let char of row) {
+      if (isNaN(char)) {
+        // Convert pieces to numbers
+        rowArray.push(pieceToNumber(char));
+      } else {
+        // Empty squares are represented by numbers (1-8)
+        rowArray.push(...Array(parseInt(char)).fill(0));
+      }
+    }
+    board.push(rowArray);
+  }
+
+  // Convert to Tensor
+  const boardTensor = tf.tensor(board, [1, 8, 8, 12]); // Adjust dimensions if necessary
+
+  return boardTensor;
+}
+
+    function pieceToNumber(piece) {
+    // Basic piece encoding based on your model's setup
+        switch (piece) {
+            case 'r': return [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            case 'n': return [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            case 'b': return [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            case 'q': return [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0];
+            case 'k': return [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
+            case 'p': return [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0];
+            case 'R': return [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
+            case 'N': return [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0];
+            case 'B': return [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0];
+            case 'Q': return [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0];
+            case 'K': return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0];
+            case 'P': return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
+            default: return Array(12).fill(0); // Empty square
         }
-      }
+    }
 
-      function onDrop (source, target) {
-        // see if the move is legal
-        var move = game.move({
-          from: source,
-          to: target,
-          promotion: 'q'
-        });
+    function postprocessPredictions(predictions) {
+      // Implement post-processing to convert model output to a chess move
+      // Example: Convert tensor to move notation
+    }
 
-        // illegal move
-        if (move === null) return 'snapback';
+    async function predictBestMove(fen) {
+      const inputTensor = preprocessFEN(fen);
+      const predictions = modelBlack.predict(inputTensor);
+      const bestMove = postprocessPredictions(predictions);
+      return bestMove;
+    }
 
+    async function makeBestMove() {
+      const boardState = game.fen();
+      const move = await predictBestMove(boardState);
+      if (move) {
+        game.move(move);
+        board1.position(game.fen());
         updateStatus();
       }
+    }
 
-      function onSnapEnd () {
-        board1.position(game.fen());
+    function onDragStart (source, piece, position, orientation) {
+      if (game.game_over()) return false;
+      if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
+          (game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+        return false;
       }
+    }
 
-      function updateStatus () {
-        var status = '';
+    function onDrop (source, target) {
+      var move = game.move({
+        from: source,
+        to: target,
+        promotion: 'q'
+      });
 
-        var moveColor = 'White';
-        if (game.turn() === 'b') {
-          moveColor = 'Black';
-        }
-
-        // checkmate?
-        if (game.in_checkmate()) {
-          status = 'Game over, ' + moveColor + ' is in checkmate.';
-        }
-
-        // draw?
-        else if (game.in_draw()) {
-          status = 'Game over, drawn position';
-        }
-
-        // game still on
-        else {
-          status = moveColor + ' to move';
-
-          // check?
-          if (game.in_check()) {
-            status += ', ' + moveColor + ' is in check';
-          }
-        }
-
-        $('#status').html(status);
-        $('#fen').html(game.fen());
-        $('#pgn').html(game.pgn());
-      }
-
-      var config = {
-        draggable: true,
-        position: 'start',
-        onDragStart: onDragStart,
-        onDrop: onDrop,
-        onSnapEnd: onSnapEnd
-      };
-
-      board1 = ChessBoard('board1', config);
+      if (move === null) return 'snapback';
 
       updateStatus();
-    </script>
-  </body>
+
+      // Make Black's move
+      makeBestMove();
+    }
+
+    function onSnapEnd () {
+      board1.position(game.fen());
+    }
+
+    function updateStatus () {
+      var status = '';
+      var moveColor = 'White';
+      if (game.turn() === 'b') {
+        moveColor = 'Black';
+      }
+
+      if (game.in_checkmate()) {
+        status = 'Game over, ' + moveColor + ' is in checkmate.';
+      } else if (game.in_draw()) {
+        status = 'Game over, drawn position';
+      } else {
+        status = moveColor + ' to move';
+        if (game.in_check()) {
+          status += ', ' + moveColor + ' is in check';
+        }
+      }
+
+      $('#status').html(status);
+      $('#fen').html(game.fen());
+      $('#pgn').html(game.pgn());
+    }
+
+    var config = {
+      draggable: true,
+      position: 'start',
+      onDragStart: onDragStart,
+      onDrop: onDrop,
+      onSnapEnd: onSnapEnd
+    };
+
+    board1 = ChessBoard('board1', config);
+
+    updateStatus();
+    loadModel(); // Load model when page loads
+  </script>
+</body>
 </html>
