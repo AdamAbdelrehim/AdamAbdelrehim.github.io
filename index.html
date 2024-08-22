@@ -4,11 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Chessboard</title>
-    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard-1.0.0.min.css">
     <style>
         #board {
             width: 400px;
             margin: 20px auto;
+        }
+        .board .square-55d63 {
+            background-color: #eee;
+        }
+        .board .square-55d63:hover {
+            background-color: #ddd;
         }
     </style>
 </head>
@@ -19,7 +25,7 @@
     <button id="clearBoard">Clear Board</button>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboardjs/1.0.0/chessboard-1.0.0.min.js"></script>
     <script>
         var board = ChessBoard('board', {
             draggable: true,
@@ -33,10 +39,8 @@
         }
 
         function onDragStart (source, piece, position, orientation) {
-            if (board.isMoveable(piece)) {
-                return true; // Allow the piece to be moved
-            }
-            return false; // Prevent moving the piece
+            // Restrict the movement of pieces as needed
+            return true;
         }
 
         $('#startPos').on('click', board.start);
