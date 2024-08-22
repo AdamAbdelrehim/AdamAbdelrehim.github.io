@@ -3,19 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Board</title>
+    <title>Interactive Chessboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <style>
+        #board {
+            width: 400px;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
-    <iframe id="12106419" allowtransparency="true" frameborder="0" style="width:100%;border:none;" src="//www.chess.com/emboard?id=12106419"></iframe>
+    <h1>Interactive Chessboard</h1>
+    <div id="board"></div>
+    <button id="startPos">Start Position</button>
+    <button id="clearBoard">Clear Board</button>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script>
-        window.addEventListener("message", e => {
-            if (e.data && e.data.id === "12106419") {
-                const iframe = document.getElementById(`${e.data.id}`);
-                if (iframe) {
-                    iframe.style.height = `${e.data.frameHeight + 30}px`;
-                }
-            }
+        var board = ChessBoard('board', {
+            draggable: true,
+            position: 'start',
+            onChange: onChange,
+            onDragStart: onDragStart
         });
+
+        function onChange(oldPos, newPos) {
+            console.log('Board position changed from', oldPos, 'to', newPos);
+        }
+
+        function onDragStart (source, piece, position, orientation) {
+            if (board.isMoveable(piece)) {
+                return true; // Allow the piece to be moved
+            }
+            return false; // Prevent moving the piece
+        }
+
+        $('#startPos').on('click', board.start);
+        $('#clearBoard').on('click', board.clear);
     </script>
 </body>
 </html>
