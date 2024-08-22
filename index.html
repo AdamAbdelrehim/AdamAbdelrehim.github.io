@@ -73,8 +73,7 @@
       var moveColor = 'White';
       if (game.turn() === 'b') {
         moveColor = 'Black';
-        print("Hello");
-        makeEngineMove(game.fen());
+        console.log("Hello");
       }
       if (game.in_checkmate()) {
         status = 'Game over, ' + moveColor + ' is in checkmate.';
